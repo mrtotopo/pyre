@@ -6,6 +6,11 @@ import socket
 def main():
     while True:
         current_path = os.getcwd()
+        home_dir = os.path.expanduser("~")
+
+        if current_path.startswith(home_dir):
+            current_path = current_path.replace(home_dir, "~", 1)
+
         username = getpass.getuser()
         hostname = socket.gethostname()
 
