@@ -1,3 +1,3 @@
 # 🔥 Pyre Shell
 
-Unix based shell written in Python.
+Unix shell written in Python.
