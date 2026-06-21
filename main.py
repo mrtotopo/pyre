@@ -1,6 +1,9 @@
 import getpass
 import os
+import readline
 import socket
+
+from utils.autocompletions import path_completer
 
 
 def main():
@@ -53,4 +56,7 @@ def main():
 
 
 if __name__ == '__main__':
+    readline.set_completer(path_completer)
+    readline.parse_and_bind('tab: complete')
+
     main()
