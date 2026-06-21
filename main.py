@@ -1,10 +1,15 @@
+import getpass
 import os
+import socket
 
 
 def main():
     while True:
         current_path = os.getcwd()
-        user_input = input(f"pyre:{current_path} $ ")
+        username = getpass.getuser()
+        hostname = socket.gethostname()
+
+        user_input = input(f"{username}@{hostname}:{current_path} $ ")
 
         if not user_input:
             continue
