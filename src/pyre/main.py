@@ -3,7 +3,7 @@ import os
 import readline
 import socket
 
-from utils.autocompletions import path_completer
+from pyre.utils.autocompletions import path_completer
 
 
 def main():
