@@ -5,6 +5,11 @@ import socket
 
 from pyre.utils.autocompletions import smart_completer
 
+# Ansi color codes for the prompt
+GREEN = "\x01\033[32m\x02"
+BLUE = "\x01\033[34m\x02"
+RESET = "\x01\033[0m\x02" # Return to default color
+BOLD = "\x01\033[1m\x02"
 
 def main():
     readline.set_completer(smart_completer)  # Set the custom completer function for autocompletion
@@ -20,7 +25,8 @@ def main():
         username = getpass.getuser()
         hostname = socket.gethostname()
 
-        user_input = input(f"{username}@{hostname}:{current_path} $ ")  # Wait the user input
+        prompt = f"{BOLD}{GREEN}{username}@{hostname}{RESET}:{BOLD}{BLUE}{current_path}{RESET} {BOLD}${RESET} "
+        user_input = input(prompt)  # Wait the user input
 
         if not user_input:
             continue
