@@ -13,7 +13,11 @@ BOLD = "\x01\033[1m\x02"
 
 def main():
     readline.set_completer(smart_completer)  # Set the custom completer function for autocompletion
-    readline.parse_and_bind('tab: complete')  # Set Tab key to trigger autocompletion
+
+    if getattr(readline, "backend", "") == "editline" or "libedit" in getattr(readline, "__doc__", ""):
+        readline.parse_and_bind("bind ^I rl_complete") # Set Tab key to trigger autocompletion for libedit
+    else:
+        readline.parse_and_bind("tab: complete") # Set Tab key to trigger autocompletion for GNU
 
     while True:
         current_path = os.getcwd()
