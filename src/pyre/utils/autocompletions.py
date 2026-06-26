@@ -55,36 +55,36 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
     """
     Custom display function to show autocompletion matches with a limit and prompt for user confirmation if exceeded.
     """
-    LIMIT: Final[int] = 30 # Limit for the number of matches to display
+    LIMIT: Final[int] = 30  # Limit for the number of matches to display
 
     if len(matches) > LIMIT:
         print(f"\nDisplay all {len(matches)} possibilities? (y or n) ", end="")
-        sys.stdout.flush() # Show the prompt immediately
+        sys.stdout.flush()  # Show the prompt immediately
 
-        fd: int = sys.stdin.fileno() # Get file descriptor for standard input
-        old_settings = termios.tcgetattr(fd) # Save current terminal settings
+        fd: int = sys.stdin.fileno()  # Get file descriptor for standard input
+        old_settings = termios.tcgetattr(fd)  # Save current terminal settings
 
         try:
-            tty.setraw(fd) # Set terminal to raw mode to read single character input
-            ch: str = sys.stdin.read(1) # Read a single character from standard input (y or n)
+            tty.setraw(fd)  # Set terminal to raw mode to read single character input
+            ch: str = sys.stdin.read(1)  # Read a single character from standard input (y or n)
         finally:
-            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings) # Restore terminal settings
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)  # Restore terminal settings
 
-        print() # Print a newline after user input
+        print()  # Print a newline after user input
 
         if ch.lower() != "y":
-            current_buffer = readline.get_line_buffer() # Get the current user input line
-            redraw_input_line(current_buffer) # Redraw the input line to restore the prompt and user input
-            return # Exit the function without displaying matches
+            current_buffer = readline.get_line_buffer()  # Get the current user input line
+            redraw_input_line(current_buffer)  # Redraw the input line to restore the prompt and user input
+            return  # Exit the function without displaying matches
 
     # If the number of matches is within the limit or user confirmed, display the matches
 
-    print() # Print a newline before displaying matches
+    print()  # Print a newline before displaying matches
 
     try:
-        term_width = os.get_terminal_size().columns # Get the terminal width to format the output
+        term_width = os.get_terminal_size().columns  # Get the terminal width to format the output
     except OSError:
-        term_width = 80 # If unable to get terminal size, default to 80 columns
+        term_width = 80  # If unable to get terminal size, default to 80 columns
 
     # Calculate the width of each column based on the longest match length and 2 spaces for margin
     column_width = longest_match_length + 2
@@ -93,11 +93,11 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
     num_columns = max(1, term_width // column_width)
 
     for i, match in enumerate(matches):
-        print(f"{match:<{column_width}}", end="") # Print each match left-aligned with the calculated column width
-        if (i + 1) % num_columns == 0: # If the current match is the last in the row, print a newline
+        print(f"{match:<{column_width}}", end="")  # Print each match left-aligned with the calculated column width
+        if (i + 1) % num_columns == 0:  # If the current match is the last in the row, print a newline
             print()
 
-    print() # Print a newline after displaying all matches
+    print()  # Print a newline after displaying all matches
 
     current_buffer = readline.get_line_buffer()  # Get the current user input line
     redraw_input_line(current_buffer)  # Redraw the input line to restore the prompt and user input
