@@ -1,35 +1,26 @@
-import getpass
 import os
+
 import readline
-import socket
 
-from pyre.utils.autocompletions import smart_completer
+from pyre.utils.autocompletions import smart_completer, custom_display_matches
+from pyre.utils.ui import print_prompt_header, get_input_prompt
 
-# Ansi color codes for the prompt
-GREEN = "\x01\033[32m\x02"
-BLUE = "\x01\033[34m\x02"
-RESET = "\x01\033[0m\x02" # Return to default color
-BOLD = "\x01\033[1m\x02"
 
 def main():
     readline.set_completer(smart_completer)  # Set the custom completer function for autocompletion
 
     if getattr(readline, "backend", "") == "editline" or "libedit" in getattr(readline, "__doc__", ""):
-        readline.parse_and_bind("bind ^I rl_complete") # Set Tab key to trigger autocompletion for libedit
+        readline.parse_and_bind("bind ^I rl_complete")  # Set Tab key to trigger autocompletion for libedit
     else:
-        readline.parse_and_bind("tab: complete") # Set Tab key to trigger autocompletion for GNU
+        readline.parse_and_bind("tab: complete")  # Set Tab key to trigger autocompletion for GNU
+
+        # Set the custom display function for autocompletion matches
+        readline.set_completion_display_matches_hook(custom_display_matches)
 
     while True:
-        current_path = os.getcwd()
-        home_dir = os.path.expanduser("~")  # Get the home directory path
+        print_prompt_header()  # Print the prompt header with the current user, hostname, and working directory
+        prompt = get_input_prompt()  # Get the input prompt string
 
-        if current_path.startswith(home_dir):
-            current_path = current_path.replace(home_dir, "~", 1)  # Replace the home directory with ~
-
-        username = getpass.getuser()
-        hostname = socket.gethostname()
-
-        prompt = f"{BOLD}{GREEN}{username}@{hostname}{RESET}:{BOLD}{BLUE}{current_path}{RESET} {BOLD}${RESET} "
         user_input = input(prompt)  # Wait the user input
 
         if not user_input:
