@@ -16,20 +16,20 @@ def print_prompt_header() -> None:
     """
     Print the prompt header with the current user, hostname, and working directory.
     """
-    current_path = os.getcwd()  # Get the current working directory
-    home_dir = os.path.expanduser("~")  # Get the home directory path
+    current_path: str = os.getcwd()  # Get the current working directory
+    home_dir: str = os.path.expanduser("~")  # Get the home directory path
 
     if current_path.startswith(home_dir):
-        current_path = current_path.replace(home_dir, "~", 1)  # Replace the home directory with ~
+        current_path: str = current_path.replace(home_dir, "~", 1)  # Replace the home directory with ~
 
-    username = getpass.getuser()  # Get the username
-    hostname = socket.gethostname()  # Get the hostname
+    username: str = getpass.getuser()  # Get the username
+    hostname: str = socket.gethostname()  # Get the hostname
 
-    brackets_start = f"{BOLD}[{RESET}"
-    brackets_end = f"{BOLD}]{RESET}"
+    brackets_start: str = f"{BOLD}[{RESET}"
+    brackets_end: str = f"{BOLD}]{RESET}"
 
-    user_host = f"{BOLD}{GREEN}{username}@{hostname}{RESET}"
-    path = f"{BOLD}{BLUE}{current_path}{RESET}"
+    user_host: str = f"{BOLD}{GREEN}{username}@{hostname}{RESET}"
+    path: str = f"{BOLD}{BLUE}{current_path}{RESET}"
 
     print(f"\n{user_host} {brackets_start}{path}{brackets_end}")  # username@hostname [path]
 
@@ -48,7 +48,7 @@ def redraw_input_line(user_text: str) -> None:
     print_prompt_header()
 
     # Clean the prompt string by removing the readline escape sequences
-    clean_prompt = get_input_prompt().replace("\x01", "").replace("\x02", "")
+    clean_prompt: str = get_input_prompt().replace("\x01", "").replace("\x02", "")
 
     sys.stdout.write(clean_prompt + user_text)  # Write the prompt and user input to stdout
     sys.stdout.flush()  # Show the prompt and user input immediately

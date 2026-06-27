@@ -22,15 +22,15 @@ def main():
 
     while True:
         print_prompt_header()  # Print the prompt header with the current user, hostname, and working directory
-        prompt = get_input_prompt()  # Get the input prompt string
+        prompt: str = get_input_prompt()  # Get the input prompt string
 
-        user_input = input(prompt)  # Wait the user input
+        user_input: str = input(prompt)  # Wait the user input
 
         if not user_input:
             continue
 
-        args = user_input.split()  # Get arguments from the user input
-        command = args[0]  # Get the command
+        args: list[str] = user_input.split()  # Get arguments from the user input
+        command: str = args[0]  # Get the command
 
         if command == "exit":
             break
@@ -51,7 +51,7 @@ def main():
                 print(f"pyre: cd: {args[1]}: Not a directory")
             continue
 
-        pid = os.fork()  # Create a child process to execute the command
+        pid: int = os.fork()  # Create a child process to execute the command
 
         if pid == 0:  # Child process
             try:

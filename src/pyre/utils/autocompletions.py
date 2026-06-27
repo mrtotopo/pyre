@@ -2,7 +2,7 @@ import glob
 import os
 import sys
 import tty
-from typing import Final, Sequence
+from typing import Final, Sequence, Any
 
 import readline
 import termios
@@ -62,7 +62,7 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
         sys.stdout.flush()  # Show the prompt immediately
 
         fd: int = sys.stdin.fileno()  # Get file descriptor for standard input
-        old_settings = termios.tcgetattr(fd)  # Save current terminal settings
+        old_settings: list[Any] = termios.tcgetattr(fd)  # Save current terminal settings
 
         try:
             tty.setraw(fd)  # Set terminal to raw mode to read single character input
@@ -73,7 +73,7 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
         print()  # Print a newline after user input
 
         if ch.lower() != "y":
-            current_buffer = readline.get_line_buffer()  # Get the current user input line
+            current_buffer: str = readline.get_line_buffer()  # Get the current user input line
             redraw_input_line(current_buffer)  # Redraw the input line to restore the prompt and user input
             return  # Exit the function without displaying matches
 
@@ -82,15 +82,15 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
     print()  # Print a newline before displaying matches
 
     try:
-        term_width = os.get_terminal_size().columns  # Get the terminal width to format the output
+        term_width: int = os.get_terminal_size().columns  # Get the terminal width to format the output
     except OSError:
-        term_width = 80  # If unable to get terminal size, default to 80 columns
+        term_width: int = 80  # If unable to get terminal size, default to 80 columns
 
     # Calculate the width of each column based on the longest match length and 2 spaces for margin
-    column_width = longest_match_length + 2
+    column_width: int = longest_match_length + 2
 
     # Calculate the number of columns that can fit in the terminal width
-    num_columns = max(1, term_width // column_width)
+    num_columns: int = max(1, term_width // column_width)
 
     for i, match in enumerate(matches):
         print(f"{match:<{column_width}}", end="")  # Print each match left-aligned with the calculated column width
@@ -99,5 +99,5 @@ def custom_display_matches(_substitution: str, matches: Sequence[str], longest_m
 
     print()  # Print a newline after displaying all matches
 
-    current_buffer = readline.get_line_buffer()  # Get the current user input line
+    current_buffer: str = readline.get_line_buffer()  # Get the current user input line
     redraw_input_line(current_buffer)  # Redraw the input line to restore the prompt and user input
