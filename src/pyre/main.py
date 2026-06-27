@@ -3,10 +3,13 @@ import os
 import readline
 
 from pyre.utils.autocompletions import smart_completer, custom_display_matches
+from pyre.utils.history import setup_history, display_history
 from pyre.utils.ui import print_prompt_header, get_input_prompt
 
 
 def main():
+    setup_history()  # Initialize the command history
+
     readline.set_completer(smart_completer)  # Set the custom completer function for autocompletion
 
     if getattr(readline, "backend", "") == "editline" or "libedit" in getattr(readline, "__doc__", ""):
@@ -31,6 +34,10 @@ def main():
 
         if command == "exit":
             break
+
+        if command == "history":
+            display_history()
+            continue
 
         if command == "cd":
             try:
