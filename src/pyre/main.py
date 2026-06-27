@@ -17,8 +17,8 @@ def main():
     else:
         readline.parse_and_bind("tab: complete")  # Set Tab key to trigger autocompletion for GNU
 
-        # Set the custom display function for autocompletion matches
-        readline.set_completion_display_matches_hook(custom_display_matches)
+    # Set the custom display function for autocompletion matches
+    readline.set_completion_display_matches_hook(custom_display_matches)
 
     while True:
         print_prompt_header()  # Print the prompt header with the current user, hostname, and working directory

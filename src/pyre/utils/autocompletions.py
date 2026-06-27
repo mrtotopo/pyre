@@ -9,6 +9,7 @@ import termios
 
 from pyre.utils.ui import redraw_input_line
 
+BUILTIN_COMMANDS: Final[list[str]] = ["cd", "exit", "history"]
 
 def get_system_commands(prefix: str) -> list[str]:
     """
@@ -40,6 +41,11 @@ def smart_completer(text: str, state: int) -> str | None:
 
     if " " not in buffer.lstrip():
         matches: list[str] = get_system_commands(text)  # Search for commands in PATH
+
+        # Filter built-in commands that start with the current text
+        filtered_builtins: list[str] = [cmd for cmd in BUILTIN_COMMANDS if cmd.startswith(text)]
+    
+        matches.extend(filtered_builtins)  # Add built-in commands
         matches.extend(glob.glob(text + '*'))  # Add local files
         matches: list[str] = sorted(list(set(matches)))  # Remove duplicates and sort
     else:
