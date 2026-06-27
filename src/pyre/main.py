@@ -1,4 +1,5 @@
 import os
+import shlex
 
 import readline
 
@@ -29,7 +30,7 @@ def main():
         if not user_input:
             continue
 
-        args: list[str] = user_input.split()  # Get arguments from the user input
+        args: list[str] = shlex.split(user_input)  # Get arguments from the user input
         command: str = args[0]  # Get the command
 
         if command == "exit":
