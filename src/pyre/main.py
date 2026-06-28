@@ -22,10 +22,17 @@ def main():
     readline.set_completion_display_matches_hook(custom_display_matches)
 
     while True:
-        print_prompt_header()  # Print the prompt header with the current user, hostname, and working directory
-        prompt: str = get_input_prompt()  # Get the input prompt string
+        try:
+            print_prompt_header()  # Print the prompt header with the current user, hostname, and working directory
+            prompt: str = get_input_prompt()  # Get the input prompt string
 
-        user_input: str = input(prompt)  # Wait the user input
+            user_input: str = input(prompt)  # Wait the user input
+        except KeyboardInterrupt:
+            print()  # Print a new line to avoid overwriting the prompt
+            continue  # Restart the loop to display the prompt again
+        except EOFError:
+            print()  # Print a new line to avoid overwriting the prompt
+            break
 
         if not user_input:
             continue
@@ -64,7 +71,10 @@ def main():
                 os._exit(1)  # Exit child process with error code
 
         elif pid > 0:  # Parent process
-            os.wait()  # Wait for the child process to finish
+            try:
+                os.waitpid(pid, 0)  # Wait for the child process to finish
+            except KeyboardInterrupt:
+                print()  # Print a new line to avoid overwriting the prompt
 
 
 if __name__ == '__main__':
