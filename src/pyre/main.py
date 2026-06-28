@@ -1,10 +1,10 @@
-import os
 import shlex
 
 import readline
 
+from pyre.core.executor import execute_command
 from pyre.utils.autocompletions import smart_completer, custom_display_matches
-from pyre.utils.history import setup_history, display_history
+from pyre.utils.history import setup_history
 from pyre.utils.ui import print_prompt_header, get_input_prompt
 
 
@@ -34,47 +34,24 @@ def main():
             print()  # Print a new line to avoid overwriting the prompt
             break
 
-        if not user_input:
+        # If the user input is empty or only whitespace, restart the loop to display the prompt again
+        if not user_input.strip():
             continue
 
-        args: list[str] = shlex.split(user_input)  # Get arguments from the user input
-        command: str = args[0]  # Get the command
+        # Create a lexer for parsing the user input
+        lexer = shlex.shlex(user_input, posix=True, punctuation_chars="<>|")
+        lexer.whitespace_split = True  # Split the input into tokens based on whitespace
 
-        if command == "exit":
+        args: list[str] = list(lexer)  # Convert the lexer output to a list of arguments
+
+        if not args:  # If the user input is empty after parsing, restart the loop to display the prompt again
+            continue
+
+        # Execute the command and get the result indicating whether to continue or exit the shell
+        should_continue = execute_command(args)
+
+        if not should_continue:  # If the command indicates to exit the shell, break the loop and terminate the program
             break
-
-        if command == "history":
-            display_history()
-            continue
-
-        if command == "cd":
-            try:
-                if len(args) == 1:
-                    os.chdir(os.path.expanduser("~"))  # If no argument is provided, change to the home directory
-                else:
-                    os.chdir(args[1])  # Move to the specified directory
-            except FileNotFoundError:
-                print(f"pyre: cd: {args[1]}: No such file or directory")
-            except NotADirectoryError:
-                print(f"pyre: cd: {args[1]}: Not a directory")
-            continue
-
-        pid: int = os.fork()  # Create a child process to execute the command
-
-        if pid == 0:  # Child process
-            try:
-                os.execvp(command, args)  # Replace the current process with the new command, passing the arguments
-            except FileNotFoundError:
-                print(f"pyre: {command}: command not found")
-            except Exception as e:
-                print(f"pyre: {command}: {e}")
-                os._exit(1)  # Exit child process with error code
-
-        elif pid > 0:  # Parent process
-            try:
-                os.waitpid(pid, 0)  # Wait for the child process to finish
-            except KeyboardInterrupt:
-                print()  # Print a new line to avoid overwriting the prompt
 
 
 if __name__ == '__main__':
