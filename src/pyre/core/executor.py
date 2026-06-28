@@ -1,6 +1,7 @@
 import os
 
-from pyre.utils.history import display_history
+from pyre.core.builtins import BUILTIN_COMMANDS
+from pyre.core.config import shell_config
 from pyre.utils.redirections import handle_redirections
 
 
@@ -9,6 +10,8 @@ def execute_command(args: list[str]) -> bool:
     Execute built-in and external commands applied global redirections.
     Returns True to continue execution, False to close the shell.
     """
+    args = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
+
     saved_stdin: int = os.dup(0)  # Save the original standard input file descriptor
     saved_stdout: int = os.dup(1)  # Save the original standard output file descriptor
 
@@ -22,24 +25,8 @@ def execute_command(args: list[str]) -> bool:
         command: str = clean_args[0]
 
         # Build-in commands
-        if command == "exit":
-            return False  # Return False to indicate that the shell should exit
-
-        if command == "history":
-            display_history()
-            return True  # Return True to indicate successful execution
-
-        if command == "cd":
-            try:
-                if len(args) == 1:
-                    os.chdir(os.path.expanduser("~"))  # If no argument is provided, change to the home directory
-                else:
-                    os.chdir(args[1])  # Move to the specified directory
-            except FileNotFoundError:
-                print(f"pyre: cd: {args[1]}: No such file or directory")
-            except NotADirectoryError:
-                print(f"pyre: cd: {args[1]}: Not a directory")
-            return True  # Return True to indicate successful execution
+        if command in BUILTIN_COMMANDS:
+            return BUILTIN_COMMANDS[command](clean_args)
 
         # External commands
         if command == "ls":

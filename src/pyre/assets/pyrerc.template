@@ -1,0 +1,10 @@
+# ~/.pyrerc
+# Pyre Shell Configuration File
+
+# Alias examples
+# alias ll="ls -la"
+# alias la="ls -A"
+
+# environment variables examples
+# export PYRE_CONFIGFILE="$HOME/.pyrerc"
+# export PYRE_EDITOR="vim"

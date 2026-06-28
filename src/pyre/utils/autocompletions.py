@@ -7,9 +7,10 @@ from typing import Final, Sequence, Any
 import readline
 import termios
 
+from pyre.core.builtins import BUILTIN_COMMANDS
+from pyre.core.config import shell_config
 from pyre.utils.ui import redraw_input_line
 
-BUILTIN_COMMANDS: Final[list[str]] = ["cd", "exit", "history"]
 
 def get_system_commands(prefix: str) -> list[str]:
     """
@@ -42,19 +43,38 @@ def smart_completer(text: str, state: int) -> str | None:
     if " " not in buffer.lstrip():
         matches: list[str] = get_system_commands(text)  # Search for commands in PATH
 
-        # Filter built-in commands that start with the current text
-        filtered_builtins: list[str] = [cmd for cmd in BUILTIN_COMMANDS if cmd.startswith(text)]
-    
+        # Filter built-in commands and aliases that start with the current text
+        filtered_builtins: list[str] = [cmd for cmd in BUILTIN_COMMANDS.keys() if cmd.startswith(text)]
+        filtered_aliases: list[str] = [alias for alias in shell_config.aliases.keys() if alias.startswith(text)]
+
         matches.extend(filtered_builtins)  # Add built-in commands
-        matches.extend(glob.glob(text + '*'))  # Add local files
-        matches: list[str] = sorted(list(set(matches)))  # Remove duplicates and sort
+        matches.extend(filtered_aliases)  # Add aliases
+
+        expanded_text: str = os.path.expanduser(text)  # Expand ~ to the user's home directory
+
+        matches.extend(glob.glob(expanded_text + '*'))  # Add local files or directories that match the current text
+        matches = sorted(list(set(matches)))  # Remove duplicates and sort the matches
     else:
-        matches: list[str] = glob.glob(text + '*')  # Search local files or directories
+        uses_tilde = text.startswith("~")  # Check if the text starts with ~
+
+        expanded_text: str = os.path.expanduser(text)  # Expand ~ to the user's home directory
+        raw_matches: list[str] = glob.glob(expanded_text + '*')  # Search local files or directories
+
+        matches: list[str] = []  # Initialize an empty list to store matches
+
+        for match in raw_matches:
+            if uses_tilde:
+                home_dir = os.path.expanduser("~")  # Get the user's home directory
+
+                # Replace the home directory path with ~ for display purposes
+                match = match.replace(home_dir, "~", 1)
+
+            matches.append(match)  # Add the match to the list of matches
 
     if state < len(matches):
-        return matches[state]
+        return matches[state]  # Return the match corresponding to the current state (index)
     else:
-        return None
+        return None  # Return None if there are no more matches for the current state (index)
 
 
 def custom_display_matches(_substitution: str, matches: Sequence[str], longest_match_length: int) -> None:

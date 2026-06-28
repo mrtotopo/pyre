@@ -1,6 +1,6 @@
 [project]
 name = "pyre"
-version = "1.0.0.dev4"
+version = "1.0.0.dev5"
 requires-python = ">=3.13"
 dependencies = []
 
@@ -9,3 +9,6 @@ pyre = "pyre.main:main"
 
 [tool.uv]
 package = true
+
+[tool.setuptools.package-data]
+"pyre.assets" = ["*.template"]
