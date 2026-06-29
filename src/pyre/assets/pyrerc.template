@@ -4,6 +4,8 @@
 # Alias examples
 # alias ll="ls -la"
 # alias la="ls -A"
+# alias ..="cd .."
+# alias ...="cd ../.."
 
 # environment variables examples
 # export PYRE_CONFIGFILE="$HOME/.pyrerc"
