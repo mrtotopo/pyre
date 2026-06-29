@@ -1,6 +1,9 @@
 import shlex
 
-import readline
+try:
+    import gnureadline as readline
+except ImportError:
+    import readline
 
 from pyre.core.config import shell_config
 from pyre.core.executor import execute_command
@@ -20,6 +23,9 @@ def main():
 
     # Set the delimiters for autocompletion to include whitespace and special characters
     readline.set_completer_delims(" \t\n<>|;")
+
+    # Enable case-insensitive autocompletion
+    readline.parse_and_bind("set completion-ignore-case on")
 
     if getattr(readline, "backend", "") == "editline" or "libedit" in getattr(readline, "__doc__", ""):
         readline.parse_and_bind("bind ^I rl_complete")  # Set Tab key to trigger autocompletion for libedit

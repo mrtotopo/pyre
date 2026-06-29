@@ -1,7 +1,10 @@
 import atexit
 import os.path
 
-import readline
+try:
+    import gnureadline as readline
+except ImportError:
+    import readline
 
 
 def setup_history() -> None:

@@ -12,6 +12,9 @@ def execute_command(args: list[str]) -> bool:
     """
     args = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
 
+    # Expand environment variables and user home directory in the arguments
+    args = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
+
     saved_stdin: int = os.dup(0)  # Save the original standard input file descriptor
     saved_stdout: int = os.dup(1)  # Save the original standard output file descriptor
 
