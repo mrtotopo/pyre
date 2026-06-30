@@ -10,6 +10,7 @@ class ShellConfig:
 
     def __init__(self):
         self.aliases: dict[str, str] = {}
+        self.last_exit_status: int = 0
 
     @staticmethod
     def get_rc_path() -> str:

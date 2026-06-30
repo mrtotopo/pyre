@@ -59,6 +59,9 @@ def execute_command(args: list[str]) -> bool:
     # Update the arguments list with the expanded arguments after brace expansion
     args: list[str] = braced_args
 
+    # Replace the special variable "$?" with the last exit status of the previous command in the arguments
+    args = [arg.replace("$?", str(shell_config.last_exit_status)) for arg in args]
+
     # Expand environment variables and user home directory in the arguments
     args: list[str] = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
 
@@ -108,15 +111,28 @@ def execute_command(args: list[str]) -> bool:
                 os.execvp(clean_args[0], clean_args)
             except FileNotFoundError:
                 print(f"pyre: {command}: command not found")
+                os._exit(127)  # Exit child process with error code 127 (command not found)
             except Exception as e:
                 print(f"pyre: {command}: {e}")
                 os._exit(1)  # Exit child process with error code
 
         elif pid > 0:  # Parent process
             try:
-                os.waitpid(pid, 0)  # Wait for the child process to finish
+                _, status = os.waitpid(pid, 0)  # Wait for the child process to finish
+
+                if os.WIFEXITED(status):
+                    # If the child process exited normally, update the last exit status in the shell configuration
+                    shell_config.last_exit_status = os.WEXITSTATUS(status)
+
+                else:
+                    # If the child process did not exit normally, set the last exit status to 1 (indicating an error)
+                    shell_config.last_exit_status = 1
+
             except KeyboardInterrupt:
                 print()  # Print a new line to avoid overwriting the prompt
+
+                # Set the last exit status to 130 (indicating termination by Ctrl+C)
+                shell_config.last_exit_status = 130
 
         return True  # Return True to indicate successful execution
 
