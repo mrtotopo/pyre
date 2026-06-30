@@ -66,7 +66,7 @@ def builtin_source(args: list[str]) -> bool:
                     continue  # Skip empty lines and comments
 
                 # Create a lexer for parsing the line from the file, treating special characters as punctuation
-                lexer = shlex.shlex(line, posix=True, punctuation_chars="<>|")
+                lexer = shlex.shlex(line, posix=True, punctuation_chars="<>|&")
                 lexer.whitespace_split = True
 
                 line_args = list(lexer)  # Convert the lexer output to a list of arguments

@@ -53,7 +53,7 @@ def main():
             continue
 
         # Create a lexer for parsing the user input
-        lexer = shlex.shlex(user_input, posix=True, punctuation_chars="<>|")
+        lexer = shlex.shlex(user_input, posix=True, punctuation_chars="<>|&")
         lexer.whitespace_split = True  # Split the input into tokens based on whitespace
 
         args: list[str] = list(lexer)  # Convert the lexer output to a list of arguments
