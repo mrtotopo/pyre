@@ -47,7 +47,7 @@ def main():
     readline.set_completer(smart_completer)  # Set the custom completer function for autocompletion
 
     # Set the delimiters for autocompletion to include whitespace and special characters
-    readline.set_completer_delims(" \t\n<>|;")
+    readline.set_completer_delims(" \t\n<>|;&")
 
     # Enable case-insensitive autocompletion
     readline.parse_and_bind("set completion-ignore-case on")
@@ -78,7 +78,7 @@ def main():
             continue
 
         # Create a lexer for parsing the user input
-        lexer = shlex.shlex(user_input, posix=True, punctuation_chars="<>|&")
+        lexer = shlex.shlex(user_input, posix=True, punctuation_chars="<>|&;")
         lexer.whitespace_split = True  # Split the input into tokens based on whitespace
 
         args: list[str] = list(lexer)  # Convert the lexer output to a list of arguments
@@ -86,11 +86,30 @@ def main():
         if not args:  # If the user input is empty after parsing, restart the loop to display the prompt again
             continue
 
-        # Execute the command and get the result indicating whether to continue or exit the shell
-        should_continue = execute_command(args)
+        sub_commands: list[list[str]] = []  # List to hold sub-commands separated by semicolons
+        current_cmd: list[str] = []  # List to hold the current sub-command being processed
 
-        if not should_continue:  # If the command indicates to exit the shell, break the loop and terminate the program
-            break
+        for arg in args:
+            if arg == ";":
+                if current_cmd:
+                    # If a semicolon is encountered and there are arguments in the current command,
+                    # add the current command to the list of sub-commands and reset the current command
+                    # list for the next sub-command
+                    sub_commands.append(current_cmd)
+                    current_cmd = []
+            else:
+                current_cmd.append(arg)
+
+        if current_cmd:
+            # If there are any remaining arguments in the current command after processing all arguments,
+            sub_commands.append(current_cmd)
+
+        for cmd_args in sub_commands:
+            # Execute each sub-command in the list of sub-commands.
+            # If execute_command returns False (e.g., 'exit' command),
+            # we terminate the shell directly by returning from main().
+            if not execute_command(cmd_args):
+                return
 
 
 if __name__ == '__main__':
