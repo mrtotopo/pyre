@@ -28,7 +28,7 @@ wheels = [
 
 [[package]]
 name = "pyre"
-version = "1.0.0.dev5"
+version = "1.0.0.dev6"
 source = { editable = "." }
 dependencies = [
     { name = "gnureadline" },

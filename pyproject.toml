@@ -1,6 +1,6 @@
 [project]
 name = "pyre"
-version = "1.0.0.dev5"
+version = "1.0.0.dev6"
 requires-python = ">=3.13"
 dependencies = [
     "gnureadline>=8.3.3",
