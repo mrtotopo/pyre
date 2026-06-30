@@ -14,13 +14,13 @@ def execute_command(args: list[str]) -> bool:
         return True
 
     if "|" in args:  # If a pipe is present in the arguments, handle the pipe execution
-        pipe_index = args.index("|")  # Find the index of the pipe symbol in the arguments
-        left_args = args[:pipe_index]  # Get the arguments to the left of the pipe symbol
-        right_args = args[pipe_index + 1:]  # Get the arguments to the right of the pipe symbol
+        pipe_index: int = args.index("|")  # Find the index of the pipe symbol in the arguments
+        left_args: list[str] = args[:pipe_index]  # Get the arguments to the left of the pipe symbol
+        right_args: list[str] = args[pipe_index + 1:]  # Get the arguments to the right of the pipe symbol
 
         r, w = os.pipe()  # Create a pipe with read and write file descriptors
 
-        pid_left = os.fork()  # Fork a child process to execute the left command of the pipe
+        pid_left: int = os.fork()  # Fork a child process to execute the left command of the pipe
         if pid_left == 0:  # Child process for the left command
             os.close(r)  # Close the read end of the pipe in the child process
             os.dup2(w, 1)  # Duplicate the write end of the pipe to standard output (stdout)
@@ -29,7 +29,7 @@ def execute_command(args: list[str]) -> bool:
             execute_command(left_args)  # Execute the left command of the pipe recursively
             os._exit(0)  # Exit the child process after executing the left command
 
-        pid_right = os.fork()  # Fork another child process to execute the right command of the pipe
+        pid_right: int = os.fork()  # Fork another child process to execute the right command of the pipe
         if pid_right == 0:  # Child process for the right command
             os.close(w)  # Close the write end of the pipe in the child process
             os.dup2(r, 0)  # Duplicate the read end of the pipe to standard input (stdin)
@@ -46,10 +46,10 @@ def execute_command(args: list[str]) -> bool:
 
         return True  # Return True to indicate successful execution of the piped commands
 
-    args = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
+    args: list[str] = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
 
     # Expand environment variables and user home directory in the arguments
-    args = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
+    args: list[str] = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
 
     saved_stdin: int = os.dup(0)  # Save the original standard input file descriptor
     saved_stdout: int = os.dup(1)  # Save the original standard output file descriptor
