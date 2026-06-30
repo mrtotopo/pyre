@@ -1,3 +1,4 @@
+import glob
 import os
 
 from pyre.core.builtins import BUILTIN_COMMANDS
@@ -50,6 +51,23 @@ def execute_command(args: list[str]) -> bool:
 
     # Expand environment variables and user home directory in the arguments
     args: list[str] = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
+
+    expanded_args: list[str] = []  # Initialize an empty list to store the expanded arguments
+
+    for arg in args:
+        if any(char in arg for char in "*?[]"):  # Check if the argument contains any wildcard characters for globbing
+            matches = glob.glob(arg)  # Use glob to find all files and directories that match the wildcard pattern
+
+            if matches:  # If there are matches, sort them and add them to the expanded arguments list
+                expanded_args.extend(sorted(matches))
+
+            else:  # If there are no matches, keep the original argument in the expanded arguments list
+                expanded_args.append(arg)
+
+        else:  # If the argument does not contain any wildcard characters, keep it as is in the expanded arguments list
+            expanded_args.append(arg)
+
+    args: list[str] = expanded_args  # Update the arguments list with the expanded arguments
 
     saved_stdin: int = os.dup(0)  # Save the original standard input file descriptor
     saved_stdout: int = os.dup(1)  # Save the original standard output file descriptor
