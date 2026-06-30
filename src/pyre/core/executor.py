@@ -3,6 +3,7 @@ import os
 
 from pyre.core.builtins import BUILTIN_COMMANDS
 from pyre.core.config import shell_config
+from pyre.utils.expansions import expand_braces
 from pyre.utils.redirections import handle_redirections
 
 
@@ -48,6 +49,15 @@ def execute_command(args: list[str]) -> bool:
         return True  # Return True to indicate successful execution of the piped commands
 
     args: list[str] = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
+
+    braced_args: list[str] = []  # Initialize an empty list to store the arguments after brace expansion
+
+    for arg in args:
+        # Recursively expand braces in each argument and add the expanded results to the braced_args list
+        braced_args.extend(expand_braces(arg))
+
+    # Update the arguments list with the expanded arguments after brace expansion
+    args: list[str] = braced_args
 
     # Expand environment variables and user home directory in the arguments
     args: list[str] = [os.path.expanduser(os.path.expandvars(arg)) for arg in args]
