@@ -59,13 +59,22 @@ def _get_local_files_case_insensitive(expanded_text: str) -> list[str]:
                     if filename.startswith(".") and not prefix.startswith("."):
                         continue
 
+                    # Check if the matched filename is a directory
+                    full_path_check: str = os.path.join(search_dir, filename)
+
+                    # Check if the matched filename is a directory
+                    is_dir: bool = os.path.isdir(full_path_check)
+
+                    # Add a trailing slash for directories to indicate they are directories
+                    suffix: str = "/" if is_dir else ""
+
                     if directory:
                         # If a directory is specified, join it with the filename to get the full path
-                        matches.append(os.path.join(directory, filename))
+                        matches.append(os.path.join(directory, filename) + suffix)
 
                     else:
                         # If no directory is specified, just add the filename to the matches
-                        matches.append(filename)
+                        matches.append(filename + suffix)
 
     except PermissionError:
         pass  # Ignore directories that cannot be accessed due to permission errors
