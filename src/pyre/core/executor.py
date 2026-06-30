@@ -92,6 +92,18 @@ def execute_command(args: list[str]) -> bool:
         if not clean_args:
             return True
 
+        # Check if the last argument is "&" to indicate background execution
+        background: bool = False
+
+        # Check if the last argument is "&" to indicate background execution
+        if clean_args[-1] == "&":
+            background: bool = True
+            clean_args.pop()  # Remove the "&" symbol from the arguments list to indicate background execution
+
+            # If there are no arguments left after removing the "&" symbol, return True to indicate successful execution
+            if not clean_args:
+                return True
+
         command: str = clean_args[0]
 
         # Build-in commands
@@ -117,22 +129,29 @@ def execute_command(args: list[str]) -> bool:
                 os._exit(1)  # Exit child process with error code
 
         elif pid > 0:  # Parent process
-            try:
-                _, status = os.waitpid(pid, 0)  # Wait for the child process to finish
+            if background:
+                # If the command is to be executed in the background,
+                # print a message indicating that it is running in the background
+                print(f"[{pid}] {command} command is running in the background")
+                shell_config.last_exit_status = 0
 
-                if os.WIFEXITED(status):
-                    # If the child process exited normally, update the last exit status in the shell configuration
-                    shell_config.last_exit_status = os.WEXITSTATUS(status)
+            else:
+                try:
+                    _, status = os.waitpid(pid, 0)  # Wait for the child process to finish
 
-                else:
-                    # If the child process did not exit normally, set the last exit status to 1 (indicating an error)
-                    shell_config.last_exit_status = 1
+                    if os.WIFEXITED(status):
+                        # If the child process exited normally, update the last exit status in the shell configuration
+                        shell_config.last_exit_status = os.WEXITSTATUS(status)
 
-            except KeyboardInterrupt:
-                print()  # Print a new line to avoid overwriting the prompt
+                    else:
+                        # If the child process did not exit normally, set the last exit status to 1 (indicating an error)
+                        shell_config.last_exit_status = 1
 
-                # Set the last exit status to 130 (indicating termination by Ctrl+C)
-                shell_config.last_exit_status = 130
+                except KeyboardInterrupt:
+                    print()  # Print a new line to avoid overwriting the prompt
+
+                    # Set the last exit status to 130 (indicating termination by Ctrl+C)
+                    shell_config.last_exit_status = 130
 
         return True  # Return True to indicate successful execution
 

@@ -1,4 +1,6 @@
+import os
 import shlex
+import signal
 
 try:
     import gnureadline as readline
@@ -12,7 +14,30 @@ from pyre.utils.history import setup_history
 from pyre.utils.ui import print_prompt_header, get_input_prompt
 
 
+def clean_zombie_children(signum, frame):
+    """
+    Signal handler to clean up zombie child processes.
+    This function is called when a SIGCHLD signal is received, indicating that a child process has terminated.
+    It uses os.waitpid to reap any terminated child processes without blocking the main process.
+    """
+    try:
+        while True:
+            # Use os.waitpid with the WNOHANG option to check for terminated child processes without blocking
+            # -1 means to wait for any child process, and WNOHANG allows the function to return immediately
+            # if no child has exited
+            pid, status = os.waitpid(-1, os.WNOHANG)
+
+            if pid == 0 or pid == -1:
+                break
+
+    except ChildProcessError:
+        # If there are no child processes to wait for, a ChildProcessError is raised.
+        pass
+
 def main():
+    # Set up the signal handler for SIGCHLD to clean up zombie child processes
+    signal.signal(signal.SIGCHLD, clean_zombie_children)
+
     setup_history()  # Initialize the command history
 
     shell_config.ensure_rc_file_exists()  # Ensure that the .pyrerc file exists in the user's home directory
