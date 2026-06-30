@@ -10,6 +10,42 @@ def execute_command(args: list[str]) -> bool:
     Execute built-in and external commands applied global redirections.
     Returns True to continue execution, False to close the shell.
     """
+    if not args:  # If no arguments are provided, return True to continue execution
+        return True
+
+    if "|" in args:  # If a pipe is present in the arguments, handle the pipe execution
+        pipe_index = args.index("|")  # Find the index of the pipe symbol in the arguments
+        left_args = args[:pipe_index]  # Get the arguments to the left of the pipe symbol
+        right_args = args[pipe_index + 1:]  # Get the arguments to the right of the pipe symbol
+
+        r, w = os.pipe()  # Create a pipe with read and write file descriptors
+
+        pid_left = os.fork()  # Fork a child process to execute the left command of the pipe
+        if pid_left == 0:  # Child process for the left command
+            os.close(r)  # Close the read end of the pipe in the child process
+            os.dup2(w, 1)  # Duplicate the write end of the pipe to standard output (stdout)
+            os.close(w)  # Close the original write end of the pipe in the child process
+
+            execute_command(left_args)  # Execute the left command of the pipe recursively
+            os._exit(0)  # Exit the child process after executing the left command
+
+        pid_right = os.fork()  # Fork another child process to execute the right command of the pipe
+        if pid_right == 0:  # Child process for the right command
+            os.close(w)  # Close the write end of the pipe in the child process
+            os.dup2(r, 0)  # Duplicate the read end of the pipe to standard input (stdin)
+            os.close(r)  # Close the original read end of the pipe in the child process
+
+            execute_command(right_args)  # Execute the right command of the pipe recursively
+            os._exit(0)  # Exit the child process after executing the right command
+
+        os.close(r)  # Close the read end of the pipe in the parent process
+        os.close(w)  # Close the write end of the pipe in the parent process
+
+        os.waitpid(pid_left, 0)  # Wait for the left child process to finish
+        os.waitpid(pid_right, 0)  # Wait for the right child process to finish
+
+        return True  # Return True to indicate successful execution of the piped commands
+
     args = shell_config.resolve_alias(args)  # Resolve any aliases for the command before execution
 
     # Expand environment variables and user home directory in the arguments
@@ -32,7 +68,7 @@ def execute_command(args: list[str]) -> bool:
             return BUILTIN_COMMANDS[command](clean_args)
 
         # External commands
-        if command == "ls":
+        if command in ["ls", "grep", "egrep", "fgrep"]:
             if not any(arg.startswith("--color") for arg in clean_args):
                 clean_args.append("--color=auto")
 
